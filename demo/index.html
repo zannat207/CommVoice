@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en" data-size="m" data-contrast="normal">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CommVoice: community changes, in plain words (demo)</title>
+  <meta name="description" content="A scripted, offline mock-up of CommVoice: a community-facing chatbot that explains council and legal documents in plain, reassuring words — and refuses to answer anything the document doesn't cover.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f2f6f1; --card: #ffffff; --ink: #12231e; --ink2: #41564f; --line: #cbd8d1;
+      --teal: #1d9e75; --teal-d: #0b5e48; --teal-t: #e1f1ea;
+      --coral: #d85a30; --coral-d: #8c3416; --coral-t: #fbeae2;
+      --amber-t: #fbf1dc; --amber-d: #7a4d00; --focus: #9a5b00;
+      --fs: 18px; --col: 44rem;
+    }
+    html[data-size="s"] { --fs: 16px; }
+    html[data-size="l"] { --fs: 21px; }
+    html[data-contrast="high"] {
+      --bg: #ffffff; --ink: #000000; --ink2: #000000; --line: #000000;
+      --teal-d: #000000; --teal-t: #ffffff; --coral-d: #000000; --coral-t: #ffffff;
+      --amber-t: #ffffff; --amber-d: #000000; --focus: #0000cc;
+    }
+    * { box-sizing: border-box; }
+    html { font-size: var(--fs); -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--ink);
+      font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+    h1, h2, h3 { line-height: 1.25; margin: 0 0 .4em; font-weight: 700; }
+    h1 { font-size: 1.5rem; } h2 { font-size: 1.25rem; } h3 { font-size: 1.1rem; }
+    p { margin: 0 0 .8em; }
+    a { color: var(--teal-d); text-underline-offset: .18em; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .skip { position: absolute; left: -999px; top: 0; background: var(--ink); color: #fff; padding: .6rem 1rem; z-index: 20; }
+    .skip:focus { left: 0; }
+    [hidden] { display: none !important; }
+    .hint { font-size: .85rem; color: var(--ink2); }
+    .top, main, .foot { max-width: var(--col); margin-inline: auto; padding-inline: 1rem; }
+
+    .demo-ribbon { background: var(--amber-t); color: var(--amber-d); border-bottom: 2px solid #e0c07a;
+      text-align: center; font-size: .82rem; font-weight: 700; padding: .35rem 1rem; }
+
+    .top { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding-block: .9rem .4rem; flex-wrap: wrap; }
+    .wordmark { font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; color: var(--teal-d); }
+    .tagline { display: block; font-size: .85rem; color: var(--ink2); margin-top: -.15rem; }
+    .tools { display: flex; align-items: center; gap: .5rem; }
+    .sizes { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); }
+    .sizes button { border: 0; background: transparent; color: var(--ink); min-width: 2.4rem; min-height: 2.4rem; font: inherit; font-weight: 700; cursor: pointer; }
+    .sizes button[data-size="s"] { font-size: .8rem; } .sizes button[data-size="l"] { font-size: 1.3rem; }
+    .sizes button[aria-pressed="true"] { background: var(--teal-d); color: #fff; }
+    .pill { border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; min-height: 2.4rem; padding: 0 .8rem; font: inherit; font-size: .85rem; cursor: pointer; }
+    .pill[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+    main { padding-block: .6rem 2rem; }
+
+    .btn { border: 2px solid var(--teal-d); background: var(--teal-d); color: #fff; font: inherit; font-weight: 700;
+      border-radius: 10px; min-height: 2.9rem; padding: 0 1.1rem; cursor: pointer; }
+    .btn:hover { filter: brightness(1.12); }
+    .btn.ghost { background: transparent; color: var(--teal-d); }
+    .btn[disabled] { opacity: .55; cursor: progress; }
+    .link { border: 0; background: none; color: var(--teal-d); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; padding: .5rem .25rem; min-height: 2.5rem; }
+    .icon-btn { width: 2.9rem; height: 2.9rem; min-height: 2.9rem; flex: 0 0 auto; border: 2px solid var(--teal-d); background: var(--card); color: var(--teal-d); border-radius: 10px; display: grid; place-items: center; cursor: pointer; }
+    .icon-btn.plus { border-radius: 50%; width: 3rem; height: 3rem; background: var(--teal-d); color: #fff; }
+    .chip { white-space: normal; max-width: 100%; border: 2px solid var(--teal); background: var(--card); color: var(--ink); font: inherit; text-align: left;
+      border-radius: 999px; padding: .55rem 1rem; min-height: 2.9rem; cursor: pointer; }
+    .chip:hover { background: var(--teal-t); }
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+    .stage { display: flex; flex-direction: column; align-items: center; margin-bottom: .6rem; }
+    .mascot svg { display: block; overflow: visible; }
+    .mascot .body { fill: var(--teal); transition: fill .3s; }
+    .mascot[data-state="refuse"] .body { fill: var(--coral); }
+    .mascot .waves { stroke: var(--teal); } .mascot .dots circle { fill: var(--teal); }
+    .mascot .waves, .mascot .dots, .mascot .nope { opacity: 0; transition: opacity .25s; }
+    .mascot[data-state="listening"] .waves,
+    .mascot[data-state="thinking"] .dots,
+    .mascot[data-state="refuse"] .nope { opacity: 1; }
+    .mascot .eye, .mascot .bar, .mascot .bot, .mascot .dot { transform-box: fill-box; transform-origin: center; }
+    .mascot .pupil { transition: transform .3s; }
+    .mascot[data-state="thinking"] .pupil { transform: translate(6px, -7px); }
+    .mascot .bar { transform: scaleY(.35); transition: transform .25s; }
+    .mascot[data-state="refuse"] .bar { transform: scaleY(.18); }
+    .mascot[data-state="speaking"] .bar { transform: scaleY(1); }
+    .caption { position: relative; margin: .4rem 0 0; padding: .5rem 1rem; background: var(--card); border: 2px solid var(--line);
+      border-radius: 14px; text-align: center; max-width: 30rem; font-weight: 700; }
+    .caption::before { content: ""; position: absolute; left: 50%; top: -9px; width: 14px; height: 14px; background: var(--card);
+      border-left: 2px solid var(--line); border-top: 2px solid var(--line); transform: translateX(-50%) rotate(45deg); }
+
+    @media (prefers-reduced-motion: no-preference) {
+      @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+      @keyframes talk { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1.9); } }
+      @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+      @keyframes hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+      @keyframes wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
+      @keyframes pulse { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+      @keyframes wave { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+      .mascot .eye { animation: blink 4.5s infinite; }
+      .mascot .bot { animation: float 3s ease-in-out infinite; }
+      .mascot[data-state="speaking"] .bot { animation: hop .55s ease-in-out infinite; }
+      .mascot[data-state="refuse"] .bot { animation: wobble .5s ease-in-out 2; }
+      .mascot[data-state="speaking"] .bar { animation: talk .45s ease-in-out infinite; }
+      .mascot[data-state="speaking"] .bar:nth-child(2) { animation-delay: .1s; }
+      .mascot[data-state="speaking"] .bar:nth-child(3) { animation-delay: .2s; }
+      .mascot[data-state="thinking"] .dot { animation: pulse 1s infinite; }
+      .mascot[data-state="thinking"] .dot:nth-child(2) { animation-delay: .2s; }
+      .mascot[data-state="thinking"] .dot:nth-child(3) { animation-delay: .4s; }
+      .mascot[data-state="listening"] .waves path { animation: wave 1s infinite; }
+    }
+
+    .welcome { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 1.2rem 1.2rem .6rem; margin: 1rem 0; }
+    .welcome .cta { display: flex; flex-wrap: wrap; gap: .6rem; margin: .4rem 0 1rem; }
+    .docbar { display: flex; align-items: baseline; flex-wrap: wrap; gap: .3rem .8rem; border-top: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); padding: .4rem 0; margin: .8rem 0; }
+    .docname { font-weight: 700; overflow-wrap: anywhere; }
+    .docbar .link { margin-left: auto; }
+
+    .ideas { background: var(--teal-t); border: 2px solid var(--teal); border-radius: 14px; padding: .9rem 1rem .4rem; margin: 1rem 0; }
+    .ideas-title { font-weight: 700; margin-bottom: .6rem; }
+    html[data-contrast="high"] .ideas { border-color: #000; }
+
+    .chat { display: flex; flex-direction: column; gap: 1rem; margin: 1rem 0; outline: none; }
+    .msg { max-width: 94%; overflow-wrap: anywhere; }
+    .msg.user { align-self: flex-end; background: var(--teal-d); color: #fff; padding: .6rem 1rem; border-radius: 16px 16px 4px 16px; }
+    .msg.bot { align-self: flex-start; background: var(--card); border: 2px solid var(--line); padding: .8rem 1rem; border-radius: 16px 16px 16px 4px; }
+    .msg.bot.wide { max-width: 100%; align-self: stretch; }
+    .msg.bot.refusal { background: var(--coral-t); border-color: var(--coral); }
+    .msg.bot.working { color: var(--ink2); }
+    .msg .answer { margin: 0 0 .6rem; }
+    .origin { display: inline-block; font-size: .8rem; font-weight: 700; color: var(--teal-d); border: 1.5px solid var(--teal); border-radius: 6px; padding: 0 .4rem; margin-bottom: .5rem; }
+    .general-note { font-size: .85rem; color: var(--amber-d); background: var(--amber-t); border-radius: 8px; padding: .3rem .6rem; }
+    .followups { margin-top: .7rem; }
+    .followups p { font-size: .85rem; color: var(--ink2); margin-bottom: .3rem; }
+    .feedback { font-size: .85rem; color: var(--ink2); display: flex; align-items: center; flex-wrap: wrap; gap: .25rem; margin-top: .4rem; }
+    .feedback .link { font-size: .85rem; }
+
+    details.slip { margin: .4rem 0; border-left: 5px solid var(--teal); background: var(--bg); border-radius: 0 10px 10px 0; padding: .1rem .8rem; }
+    .refusal details.slip { border-left-color: var(--coral); }
+    details.slip > summary { cursor: pointer; font-weight: 700; font-size: .9rem; padding: .4rem 0; color: var(--teal-d); }
+    details.slip blockquote { margin: 0 0 .5rem; font-style: italic; font-size: .95rem; }
+    details.slip .pg { font-size: .85rem; margin: 0 0 .5rem; }
+
+    .overview h3 { margin-bottom: .2rem; }
+    .ov-section { padding: .2rem 0 .6rem; border-top: 1.5px solid var(--line); }
+    .ov-section:first-of-type { border-top: 0; }
+    .ov-section h4 { margin: .7rem 0 .25rem; font-size: 1.02rem; }
+    .ov-section p { margin-bottom: .3rem; }
+    .ov-section.missing .muted { color: var(--ink2); font-style: italic; }
+
+    .composer-wrap { position: sticky; bottom: 0; background: var(--bg); padding-top: .5rem; border-top: 1.5px solid var(--line); margin-top: 1rem; z-index: 5; }
+    .composer { display: flex; gap: .5rem; align-items: flex-end; padding: .3rem 0; }
+    .composer textarea { flex: 1 1 auto; min-width: 0; font: inherit; line-height: 1.4; border: 2px solid var(--ink2); border-radius: 10px; padding: .6rem .8rem; min-height: 2.9rem; max-height: 10rem; resize: none; overflow-y: auto; background: var(--card); color: var(--ink); }
+    .composer .btn { height: 2.9rem; }
+    .voice-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: .9rem; padding-bottom: .3rem; }
+    .switch { display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; min-height: 2.5rem; }
+    .switch input { width: 1.3rem; height: 1.3rem; accent-color: var(--teal-d); }
+    .foot { padding-block: 1rem 3rem; font-size: .85rem; color: var(--ink2); border-top: 1.5px solid var(--line); }
+    @media (max-width: 30rem) { .msg { max-width: 100%; } .composer .btn { padding: 0 .8rem; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#chat">Skip to the chat</a>
+  <div class="demo-ribbon">DEMO MOCK-UP &mdash; scripted example with canned content. No AI, no server, no data leaves this page.</div>
+
+  <header class="top">
+    <div class="brand">
+      <span class="wordmark">CommVoice</span>
+      <span class="tagline">Community changes, in plain words.</span>
+    </div>
+    <div class="tools">
+      <div class="sizes" role="group" aria-label="Text size">
+        <button type="button" data-size="s" aria-label="Smaller text" aria-pressed="false">A</button>
+        <button type="button" data-size="m" aria-label="Normal text" aria-pressed="true">A</button>
+        <button type="button" data-size="l" aria-label="Larger text" aria-pressed="false">A</button>
+      </div>
+      <button type="button" id="contrast" class="pill" aria-pressed="false">High contrast</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="stage" id="stage">
+      <div class="mascot" id="mascot" data-state="idle" role="img" aria-label="Vox, the CommVoice helper">
+        <svg viewBox="0 0 300 290" width="200" height="193" aria-hidden="true">
+          <g class="bot">
+            <g class="waves" fill="none" stroke="#1D9E75" stroke-width="5" stroke-linecap="round" opacity="0">
+              <path d="M34 108Q22 125 34 142"/><path d="M20 96Q2 125 20 154"/>
+              <path d="M266 108Q278 125 266 142"/><path d="M280 96Q298 125 280 154"/>
+            </g>
+            <g class="dots" fill="#1D9E75" opacity="0"><circle class="dot" cx="266" cy="58" r="6"/><circle class="dot" cx="282" cy="40" r="7"/><circle class="dot" cx="298" cy="20" r="8"/></g>
+            <ellipse cx="110" cy="76" rx="17" ry="14" fill="#7F77DD"/><circle cx="110" cy="52" r="13" fill="#7F77DD"/>
+            <ellipse cx="150" cy="70" rx="17" ry="14" fill="#EF9F27"/><circle cx="150" cy="46" r="13" fill="#EF9F27"/>
+            <ellipse cx="190" cy="76" rx="17" ry="14" fill="#D4537E"/><circle cx="190" cy="52" r="13" fill="#D4537E"/>
+            <rect class="body" fill="#1D9E75" x="50" y="70" width="200" height="150" rx="60"/>
+            <path class="body" fill="#1D9E75" d="M92 212 L68 262 L138 216 Z"/>
+            <g class="eye"><ellipse cx="115" cy="125" rx="18" ry="20" fill="#fff"/><circle class="pupil" cx="115" cy="127" r="8" fill="#04342C"/></g>
+            <g class="eye"><ellipse cx="185" cy="125" rx="18" ry="20" fill="#fff"/><circle class="pupil" cx="185" cy="127" r="8" fill="#04342C"/></g>
+            <g class="mouth" fill="#fff">
+              <rect class="bar" x="118" y="168" width="8" height="14" rx="4"/>
+              <rect class="bar" x="132" y="168" width="8" height="14" rx="4"/>
+              <rect class="bar" x="146" y="168" width="8" height="14" rx="4"/>
+              <rect class="bar" x="160" y="168" width="8" height="14" rx="4"/>
+              <rect class="bar" x="174" y="168" width="8" height="14" rx="4"/>
+            </g>
+            <circle cx="222" cy="196" r="15" fill="#fff"/>
+            <path d="M222 186V206M212 189H232M212 189L208 198H216ZM232 189L228 198H236Z" fill="none" stroke="#0F6E56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <g class="nope" opacity="0"><rect x="6" y="176" width="30" height="38" rx="4" fill="#fff" stroke="#8C3416" stroke-width="3"/><path d="M12 188H30M12 196H30M12 204H24" stroke="#8C3416" stroke-width="3" stroke-linecap="round"/><path d="M2 218L40 172" stroke="#D85A30" stroke-width="5" stroke-linecap="round"/></g>
+          </g>
+        </svg>
+      </div>
+      <p class="caption" id="caption" aria-live="polite">Hi, I'm Vox. Add a document and ask me about it.</p>
+    </div>
+
+    <section class="welcome" id="welcome" aria-labelledby="welcomeTitle">
+      <h1 id="welcomeTitle">Understand changes in your community, in plain words</h1>
+      <p>When your council or a public body proposes a change, the documents are written for lawyers &mdash; not for the people it affects. CommVoice explains them in everyday words, calmly and without jargon, and answers your questions <strong>only from what the document actually says</strong>. If it isn't in the document, it tells you, instead of guessing.</p>
+      <div class="cta">
+        <button type="button" class="btn" id="trySample">Try the sample document</button>
+        <button type="button" class="btn ghost" id="replay" hidden>Replay the demo</button>
+      </div>
+      <p class="hint">Sample: a City of Sydney draft planning agreement published for public comment. This is a scripted mock-up to show the experience &mdash; the live version reads any PDF, Word or text file you upload.</p>
+    </section>
+
+    <div class="docbar" id="docbar" hidden>
+      <span class="docname" id="docName"></span>
+      <span class="hint" id="docMeta"></span>
+      <button type="button" class="link" id="newDoc">Start again</button>
+    </div>
+
+    <div class="chat" id="chat" tabindex="-1" aria-live="polite" aria-relevant="additions"></div>
+
+    <div class="ideas" id="ideas" role="region" aria-label="Question ideas" hidden>
+      <p class="ideas-title">Not sure what to ask? Tap one.</p>
+      <div class="chips" id="ideaChips"></div>
+    </div>
+
+    <div class="composer-wrap">
+      <form class="composer" id="askForm" autocomplete="off">
+        <button type="button" class="icon-btn plus" id="plus" aria-label="Add a document or link" title="Add a document or link">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </button>
+        <label class="sr" for="q">Your question</label>
+        <textarea id="q" rows="1" maxlength="4000" placeholder="Try the sample to begin" enterkeyhint="send"></textarea>
+        <button type="button" class="icon-btn" id="mic" aria-label="Hold to speak" title="Hold to speak">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0M12 17v4M9 21h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="submit" class="btn" id="send">Ask</button>
+      </form>
+      <div class="voice-row">
+        <label class="switch"><input type="checkbox" id="voiceOn" checked><span>Read answers aloud</span></label>
+        <span class="hint">Demo mode: answers are scripted to show the experience.</span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p>CommVoice explains what a document says. It is not legal advice and it can make mistakes. For anything that matters, check with a lawyer or the office that gave you the document. This page is an offline mock-up for demonstration.</p>
+  </footer>
+
+  <script>
+  (() => {
+    'use strict';
+    const $ = (s, r = document) => r.querySelector(s);
+    function h(tag, props = {}, ...kids) {
+      const el = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) {
+        if (v === false || v == null) continue;
+        if (k === 'class') el.className = v;
+        else if (k === 'html') el.innerHTML = v;
+        else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v === true ? '' : v);
+      }
+      for (const kid of kids.flat()) {
+        if (kid == null || kid === false) continue;
+        el.append(kid.nodeType ? kid : document.createTextNode(kid));
+      }
+      return el;
+    }
+
+    const chat = $('#chat');
+    const mascot = $('#mascot');
+    const caption = $('#caption');
+    const CAPTIONS = {
+      idle: "Hi, I'm Vox. Add a document and ask me about it.",
+      ready: 'I have your document. Ask me anything about it.',
+      thinking: 'Checking the document...',
+      speaking: "Here's what I found.",
+      refuse: "That isn't in your document.",
+    };
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    function setState(s) { mascot.dataset.state = s; if (CAPTIONS[s]) caption.textContent = CAPTIONS[s]; }
+    function scrollDown() { chat.scrollIntoView({ block: 'end', behavior: 'smooth' }); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
+
+    // ---- Scripted content (canned, community-scenario) ----
+    const DOC = { name: 'City of Sydney — Draft Planning Agreement (public exhibition).pdf', meta: '44 pages · sample document' };
+
+    const OVERVIEW = {
+      intro: "Here's this document in plain words. I've organised it around the questions a resident usually asks. Where the document doesn't cover something, I say so rather than guess.",
+      sections: [
+        { h: 'What is this document?', p: "It's a draft agreement between the City of Sydney and a developer, put out for the public to read and comment on. It sets out what the developer would provide to the community in return for being allowed to build.", supported: true },
+        { h: 'Why is it needed?', p: "When a large development goes ahead, the council and the developer can agree that the developer will pay for or build public benefits nearby. This document is that promise, written down.", supported: true },
+        { h: 'What is being proposed?', p: "The developer would provide new community benefits as part of the project, including a new public open space and improvements to nearby streets and walkways.", supported: true },
+        { h: 'What does it mean for residents, visitors and businesses?', p: "For people living nearby, it could mean a new place to relax outdoors and easier, safer walking routes. For local businesses, more people passing by. These are what the document describes — not promises about house prices or rents.", supported: true },
+        { h: 'Affordable housing', p: "The document sets aside a number of homes that are more affordable for people on lower incomes. It gives a figure but does not say who will be able to rent or buy them, so I won't guess at that.", supported: true },
+        { h: 'What might change or be difficult?', p: "The document doesn't say anything about traffic, parking or construction noise. If those matter to you, they'd be worth raising in your comment to the council.", supported: false },
+        { h: 'When will I see the result?', p: "The document doesn't give a completion date for the community benefits.", supported: false },
+        { h: 'What happens next?', p: "This is a draft on public exhibition, which means people can read it and send comments to the council before it is finalised.", supported: true },
+      ],
+    };
+
+    // Each Q maps to a scripted answer. type: answer | linked | general | refuse
+    const SCRIPT = {
+      housing: {
+        q: "How many affordable homes will there be, and who can get one?",
+        type: 'answer',
+        origin: 'From your document',
+        answer: "The agreement sets aside a number of homes that are more affordable for people on lower incomes. It gives the number, but it does not say who will be able to rent or buy them — so I can't tell you that part, because the document doesn't say.",
+        page: 'Page 12',
+        quote: "The Developer must dedicate affordable housing dwellings to a registered community housing provider, to be used for affordable housing in accordance with this agreement.",
+        followups: ["What is 'affordable housing'?", "Does it say anything about parking?"],
+      },
+      openspace: {
+        q: "What will the new public space be like?",
+        type: 'answer',
+        origin: 'From your document',
+        answer: "As part of the project, the developer would create a new public open space that anyone can use. In everyday terms, that's a new outdoor place near the development for people to sit, meet or relax.",
+        page: 'Page 8',
+        quote: "The Developer must design, construct and embellish the public open space and make it available for public use at no cost to the City.",
+        followups: ["When will the open space be finished?", "Who pays to look after it?"],
+      },
+      affordableterm: {
+        q: "What is 'affordable housing'?",
+        type: 'general',
+        answer: "In everyday words, “affordable housing” usually means homes rented or sold at a lower cost so people on lower or moderate incomes can afford them — for example some key workers. This is a general explanation of the term, not something taken from your document.",
+      },
+      parking: {
+        q: "Does it say anything about parking?",
+        type: 'refuse-soft',
+        answer: "The document doesn't say anything about parking. I only answer from what it actually says, so I won't guess. If parking matters to you, that's a good thing to raise in a comment to the council.",
+      },
+      rates: {
+        q: "Will this increase my council rates?",
+        type: 'refuse',
+        answer: "I can't find that in your document. I only answer from what it says, so I won't guess.",
+      },
+      timing: {
+        q: "When will the open space be finished?",
+        type: 'refuse-soft',
+        answer: "The document doesn't give a date for when the open space would be finished, so I can't tell you that. It only says the developer must build it and open it to the public.",
+      },
+    };
+
+    const START_IDEAS = [
+      { label: "How many affordable homes will there be, and who can get one?", key: 'housing' },
+      { label: "What will the new public space be like?", key: 'openspace' },
+      { label: "Will this increase my council rates?", key: 'rates' },
+    ];
+
+    let started = false;
+
+    function userMsg(text) {
+      chat.append(h('div', { class: 'msg user' }, text));
+      scrollDown();
+    }
+
+    async function botThinking() {
+      setState('thinking');
+      const el = h('div', { class: 'msg bot working' }, 'Checking the document…');
+      chat.append(el);
+      scrollDown();
+      await wait(1100);
+      el.remove();
+    }
+
+    function slip(page, quote, refuse) {
+      return h('details', { class: 'slip' + (refuse ? ' ' : '') },
+        h('summary', {}, 'See the exact words'),
+        h('p', { class: 'pg' }, page),
+        h('blockquote', {}, '“' + quote + '”')
+      );
+    }
+
+    function feedback() {
+      return h('div', { class: 'feedback' }, 'Was this helpful?',
+        h('button', { class: 'link', type: 'button', onclick(e){ e.target.replaceWith(document.createTextNode(' Thanks for the feedback.')); } }, 'Yes'),
+        h('button', { class: 'link', type: 'button', onclick(e){ e.target.replaceWith(document.createTextNode(' Thanks — we’ll use this to improve.')); } }, 'No'));
+    }
+
+    function followupChips(list) {
+      if (!list || !list.length) return null;
+      return h('div', { class: 'followups' },
+        h('p', {}, 'You could also ask:'),
+        h('div', { class: 'chips' }, list.map(q => {
+          const key = findKeyByQuestion(q);
+          return h('button', { class: 'chip', type: 'button', onclick() { ask(key, q); } }, q);
+        })));
+    }
+
+    function findKeyByQuestion(q) {
+      const ql = q.toLowerCase();
+      if (ql.includes('affordable housing')) return 'affordableterm';
+      if (ql.includes('parking')) return 'parking';
+      if (ql.includes('open space') || ql.includes('finished')) return 'timing';
+      for (const [k, v] of Object.entries(SCRIPT)) if (v.q === q) return k;
+      return null;
+    }
+
+    async function botAnswer(item) {
+      await botThinking();
+      const wrap = h('div', { class: 'msg bot' });
+      if (item.type === 'refuse') { wrap.classList.add('refusal'); setState('refuse'); }
+      else { setState('speaking'); }
+
+      if (item.origin) wrap.append(h('span', { class: 'origin' }, item.origin));
+      wrap.append(h('p', { class: 'answer' }, item.answer));
+
+      if (item.type === 'general') {
+        wrap.append(h('p', { class: 'general-note' }, 'General meaning, not from your document.'));
+      }
+      if (item.type === 'answer' && item.quote) {
+        wrap.append(slip(item.page, item.quote, false));
+      }
+      if (item.type === 'refuse') {
+        wrap.append(slip('No page', 'The document was searched and no matching wording was found.', true));
+      }
+      wrap.append(feedback());
+      const fu = followupChips(item.followups);
+      if (fu) wrap.append(fu);
+      chat.append(wrap);
+      scrollDown();
+      await wait(400);
+      if (item.type !== 'refuse') setState('ready');
+      else setState('ready');
+    }
+
+    let busy = false;
+    async function ask(key, rawText) {
+      if (busy) return;
+      const item = key && SCRIPT[key];
+      const text = rawText || (item && item.q) || '';
+      if (!text) return;
+      busy = true;
+      userMsg(text);
+      if (item) {
+        await botAnswer(item);
+      } else {
+        // Anything typed that isn't in the script -> honest refusal (shows the guardrail)
+        await botAnswer({ type: 'refuse', answer: "I can't find that in your document. I only answer from what it says, so I won't guess." });
+      }
+      busy = false;
+    }
+
+    function renderOverview() {
+      const wrap = h('div', { class: 'msg bot wide overview' });
+      wrap.append(h('span', { class: 'origin' }, 'Plain-words overview'));
+      wrap.append(h('p', {}, OVERVIEW.intro));
+      for (const s of OVERVIEW.sections) {
+        const sec = h('div', { class: 'ov-section' + (s.supported ? '' : ' missing') });
+        sec.append(h('h4', {}, s.h));
+        sec.append(h('p', { class: s.supported ? '' : 'muted' }, s.p));
+        wrap.append(sec);
+      }
+      chat.append(wrap);
+      scrollDown();
+    }
+
+    function showIdeas() {
+      const box = $('#ideas');
+      const chips = $('#ideaChips');
+      chips.replaceChildren(...START_IDEAS.map(i =>
+        h('button', { class: 'chip', type: 'button', onclick() { ask(i.key); } }, i.label)));
+      box.hidden = false;
+    }
+
+    async function startDemo() {
+      if (started) return;
+      started = true;
+      $('#welcome').hidden = true;
+      $('#docbar').hidden = false;
+      $('#docName').textContent = DOC.name;
+      $('#docMeta').textContent = DOC.meta;
+      $('#q').placeholder = 'Ask about the document, or tap a suggestion';
+      $('#replay').hidden = false;
+      setState('thinking');
+      caption.textContent = 'Reading your document…';
+      await wait(1300);
+      setState('speaking');
+      renderOverview();
+      await wait(500);
+      setState('ready');
+      showIdeas();
+    }
+
+    // ---- wire up controls ----
+    $('#trySample').addEventListener('click', startDemo);
+    $('#replay').addEventListener('click', () => location.reload());
+    $('#newDoc').addEventListener('click', () => location.reload());
+
+    $('#askForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ta = $('#q');
+      const text = ta.value.trim();
+      if (!text) return;
+      ta.value = '';
+      if (!started) { startDemo(); return; }
+      const key = findKeyByQuestion(text) || matchLoose(text);
+      ask(key, text);
+    });
+
+    // loose keyword match so a demo-driver typing freely still hits a scripted answer
+    function matchLoose(text) {
+      const t = text.toLowerCase();
+      if (t.includes('afford')) return t.includes('what') && t.includes('mean') ? 'affordableterm' : 'housing';
+      if (t.includes('open space') || t.includes('park ') || t.includes('space')) return 'openspace';
+      if (t.includes('parking')) return 'parking';
+      if (t.includes('rate')) return 'rates';
+      if (t.includes('finish') || t.includes('when')) return 'timing';
+      return null;
+    }
+
+    $('#mic').addEventListener('click', () => {
+      if (!started) { startDemo(); return; }
+      // simulate a voice question
+      ask('openspace');
+    });
+
+    // text size + contrast (same behaviour as the real app)
+    document.querySelectorAll('.sizes button').forEach(b => b.addEventListener('click', () => {
+      document.documentElement.dataset.size = b.dataset.size;
+      document.querySelectorAll('.sizes button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    }));
+    $('#contrast').addEventListener('click', (e) => {
+      const on = document.documentElement.dataset.contrast === 'high';
+      document.documentElement.dataset.contrast = on ? 'normal' : 'high';
+      e.currentTarget.setAttribute('aria-pressed', on ? 'false' : 'true');
+    });
+  })();
+  </script>
+</body>
+</html>
