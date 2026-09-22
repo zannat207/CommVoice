@@ -1,46 +1,52 @@
-# CommVoice — demo mock-up
+# CommVoice — functional demo (browser + Gemini)
 
-A **single, self-contained HTML file** (`demo/index.html`) that shows the CommVoice
-experience for a hackathon audience, with **no server, no API key, and no data leaving the page**.
+A **self-contained, functional** demo of CommVoice styled as an Australian Government service.
+It holds a real conversation grounded in a sample official document, running Google Gemini
+**directly in the browser** — no backend server required, so it can be published on GitHub Pages.
 
-Everything is scripted (canned content) so it always behaves the same on stage. It's built
-around a real community scenario: a **City of Sydney draft planning agreement** on public
-exhibition.
+Files:
+- `index.html` — the app (HTML, CSS, JS in one file; Australian-Government look)
+- `doc-data.js` — the sample document text (City of Sydney draft planning agreement,
+  155 Mitchell Road Erskineville), embedded per page so answers can cite page numbers
 
-## What it demonstrates
+## How it works
 
-1. **Empathetic, plain-words overview** — the document explained around the questions a resident
-   actually asks (*What is being proposed? What does it mean for me? What might be difficult?*),
-   in warm, jargon-free language.
-2. **Answers with a source** — every answer taken from the document shows a **"See the exact words"**
-   box with the quote and page, so people can trust it.
-3. **The guardrail (the point)** — ask something the document doesn't cover (e.g. *"Will this
-   increase my council rates?"*) and it **refuses honestly** instead of guessing:
-   *"I can't find that in your document. I only answer from what it says, so I won't guess."*
-4. **Barrier-free** — text-size controls, high-contrast mode, a friendly mascot, and a
-   "read aloud"/voice affordance.
+1. Open the page and **paste a free Google Gemini API key** (from
+   [aistudio.google.com/apikey](https://aistudio.google.com/apikey)).
+   The key is stored **only in your browser** (`localStorage`) — it is never committed to the
+   repo, never sent to this website, only to Google's Gemini API.
+2. Click **Open the sample & explain it** → Gemini writes a plain-words overview.
+3. **Ask anything in your own words**, by typing or voice. The assistant answers **only from the
+   document** and shows the exact quote + page. Ask something not covered (e.g. council rates)
+   and it declines honestly instead of guessing.
 
-## Run it
+## The guardrail
 
-Just open the file — double-click `demo/index.html`, or:
+The system prompt forces the model to answer only from the supplied document text, to attach a
+`SOURCE: page N | "quote"` line, and to reply `SOURCE: none` when the document doesn't cover the
+question — which the UI renders as an honest "Not in the document" refusal. (The full production
+app in the repo root enforces this in code with a four-gate verifier; this browser demo enforces
+the spirit of it via the prompt.)
+
+## Run locally
+
+Because it loads `doc-data.js`, open it through a tiny local server (not file://):
 
 ```
-open demo/index.html          # macOS
+cd demo
+python3 -m http.server 8000
+# then open http://127.0.0.1:8000/
 ```
 
-No install, no build, no internet needed (a web font loads if online; it falls back gracefully offline).
+## Publish (GitHub Pages)
 
-## Suggested 90-second demo flow
+Settings → Pages → Deploy from a branch → `main` / root. The demo will be at:
+`https://<owner>.github.io/CommVoice/demo/`
 
-1. Click **Try the sample document** → the overview appears in plain words.
-2. Tap **"How many affordable homes will there be, and who can get one?"** → answer + exact-words box.
-   Point out it *declines* to say who qualifies, because the document doesn't say.
-3. Tap **"Will this increase my council rates?"** → the honest refusal. This is the trust story.
-4. Toggle **High contrast** and the **A** text sizes to show accessibility.
+## Notes for the hackathon team
 
-## How this relates to the real app
-
-The real CommVoice (in the repo root) is a Python/FastAPI app that does this for **any** uploaded
-document using Google Gemini, enforced by a four-gate verification system (exact quote must exist,
-numbers must match, a second model confirms). This demo reproduces the *look and behaviour* only —
-it is not connected to any AI.
+- Free Gemini tier has low rate limits and Google may use submitted data — fine for this public
+  sample document; don't upload anything confidential.
+- Voice input uses the browser's speech recognition (best in Chrome/Edge). "Read aloud" uses the
+  browser's speech synthesis.
+- Everyone who opens the link uses **their own** key, so there's no shared cost or exposed secret.
